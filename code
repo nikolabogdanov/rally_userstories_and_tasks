@@ -1,0 +1,451 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<!-- Copyright (c) 2012 Rally Software Development Corp. All rights reserved -->
+<html>
+<head>
+  <title>PrintTaskCards</title>
+  <meta name="Name" content="App: PrintTaskCards" />
+  <meta name="Version" content="2012.10.01" />
+  <meta name="Vendor" content="Rally Software" />
+
+  <script type="text/javascript">
+    var MAX_NAME_LEN = 100;
+    var APP_TYPE = "Task";
+    var CARD_TYPE = "tasks";
+  </script>
+
+  <script type ="text/javascript" src="/apps/1.32/sdk.js"></script>
+  <script type ="text/javascript">
+    function PrintTaskCards(rallyDataSource) {
+    	var iterationDropdown;
+        
+		function createMarkup(counter, totalCards, name, ownerText, ownerClass, description, storyId, taskId, estimate, state, type) {
+            var theMarkup, id;
+            var typeClass = "";
+			
+			if (taskId === '') {
+                id = storyId;
+				typeClass = "story-type"
+				estimateNumber = '<span class="estimate estimate-number">' + estimate + '</span>';
+            } else {
+                id = taskId + ':' + storyId;
+				typeClass = "task-type"
+				estimateNumber = '';
+            }
+			
+			if(state === 'C') {
+				state = '<span class="state-sign">'+ state+ '</span>';
+			}
+    
+            theMarkup = '<div class="artifact '+ typeClass +'">' +
+                        '	<div class="header">' +
+                        '		<span class="storyID">' + id + '</span>' +
+                        '		<span class="owner ' + ownerClass + '">' + '</span>' +
+                        '		<span class="ownerText">' + ownerText + '</span>' +
+								state + 
+                        '	</div>' +
+                        '	<div class="content">' +
+                        '		<div class="card-title">' + name + '</div>' +
+                        '		<div class="description">' + description + '</div>' +
+                        '	</div>' +
+                        estimateNumber +
+						'</div>';
+    
+            if (type === "task" && counter !== totalCards && counter % 3 === 0) {
+                theMarkup += '<div class=pb></div>';
+            }
+    
+            return theMarkup;
+    	}
+			
+		function createMarkupItem(data, i, userTable, type, counter) {
+			var estimate, loginName, ownerClass, ownerText, storyId, taskId, name, description, theMarkup;
+		
+			var state = "";
+			
+			name = data[i].Name;
+			if (name.length > MAX_NAME_LEN) {
+				name = name.substring(0, MAX_NAME_LEN);
+				name += "...";
+			}
+
+			loginName = data[i].Owner;
+			if (typeof loginName === 'undefined' || loginName === null) {
+				ownerClass = "NoOwner";
+				ownerText = "No Owner";
+			} else {
+				ownerClass = loginName.UserName.replace(/[@|\.]/g, "");
+				ownerText = makeOwnerText(loginName, userTable);
+			}
+			
+			if (data[i].WorkProduct === undefined) {
+				storyId = data[i].FormattedID;
+				taskId = "";
+			} else {
+				storyId = data[i].WorkProduct.FormattedID;
+				taskId = data[i].FormattedID;
+			}
+				
+			if (data[i].PlanEstimate) {
+				estimate = data[i].PlanEstimate;
+			} else if (data[i].Estimate) {
+				estimate = data[i].Estimate;
+			} else {
+				estimate = "0";
+			}
+			
+			if (data[i].State !== undefined && data[i].State === 'Completed') {
+				state = "C";
+			} 
+
+			description = data[i].Description;
+
+			theMarkup = createMarkup(counter, data.length, name, ownerText, ownerClass, description, storyId, taskId, estimate, state, type);
+			
+			return theMarkup;
+		}	
+			
+    	function displayCards(results) {
+            var i, j, theMarkup, data, userTable;
+    
+            userTable = buildUserTable(results.users);
+		
+            data = results[CARD_TYPE];
+			stories = results['defects'];
+			stories = stories.concat(results['stories']);
+
+			for (j = 0; j < stories.length; j++) {				
+								
+				theMarkup = createMarkupItem(stories, j, userTable, "story", 0);
+				
+				dojo.byId("cards").innerHTML += theMarkup;
+				
+				var counter = 0;
+				
+				for (i = 0; i < data.length; i++) {
+				
+					if ( stories[j].FormattedID === data[i].WorkProduct.FormattedID) {
+						
+						counter++;
+						
+						theMarkup = createMarkupItem(data, i, userTable, "task", counter);
+			
+						dojo.byId("cards").innerHTML += theMarkup;						
+					}
+				}
+				
+				dojo.byId("cards").innerHTML += '<div class="page-break"></div>';
+
+			}
+    
+            ownerPopulate(results);
+    	}
+    
+    	function buildUserTable(userData) {
+            var table = {};
+            for (var i = 0; i < userData.length; i++) {
+                table[userData[i].LoginName] = userData[i].DisplayName;
+            }
+            return table;
+    	}
+    
+    	function makeOwnerText(loginName, userTable) {
+            if (typeof userTable[loginName] === 'undefined' || userTable[loginName] === '') {
+                return loginName._refObjectName.split('@');
+            } else {
+                return userTable[loginName];
+            }
+    	}
+    
+    	
+    
+    	function ownerPopulate(results) {
+            function showOwnerImage(ownerNode) {
+              ownerNode.innerHTML = "<IMG SRC='" + ownerImage + "'/>";
+            }
+    
+            for (i = 0; i < results.users.length; i++) {
+                var ownerName = results.users[i].UserName.replace(/[@|\.]/g, "");
+                var ownerImage = rally.sdk.util.Ref.getUserImage(results.users[i], 40);
+                dojo.forEach(dojo.query("." + ownerName), showOwnerImage);
+            }
+    	}
+    
+    	function runQuery() {
+            dojo.empty(dojo.byId("cards"));
+            var queryArray = [];
+    
+            queryArray[0] = {
+                key: CARD_TYPE,
+                type: CARD_TYPE,
+                query: '(Iteration.Name contains "' + iterationDropdown.getSelectedName() + '")',
+                fetch: 'Name,Iteration,WorkProduct,Owner,FormattedID,Estimate,ObjectID,Description,UserName,State',
+                order: 'Rank'
+            };
+			 queryArray[1] = {
+                key: 'defects',
+                type: 'defects',
+                query: '(Iteration.Name contains "' + iterationDropdown.getSelectedName() + '")',
+                fetch: 'Name,Iteration,WorkProduct,Owner,FormattedID,Estimate,ObjectID,Description,UserName,PlanEstimate',
+                order: 'Rank'
+            };
+             queryArray[2] = {
+                key: 'stories',
+                type: 'hierarchicalrequirement',
+                query: '(Iteration.Name contains "' + iterationDropdown.getSelectedName() + '")',
+                fetch: 'Name,Iteration,WorkProduct,Owner,FormattedID,Estimate,ObjectID,Description,UserName,PlanEstimate',
+                order: 'Rank'
+            };
+			queryArray[3] = {
+                key: 'users',
+                type: 'users',
+                fetch: 'UserName,ObjectID,DisplayName'
+            };
+
+            rallyDataSource.findAll(queryArray, displayCards);
+    	}
+    
+    	function getStyleSheet() {
+            var styleSheet;
+            dojo.forEach(dojo.query('style'), function(s) {
+                if (s.title == 'printCards') {
+                    styleSheet = s;
+                }
+            });
+            return styleSheet.innerHTML;
+    	}
+    
+    	function printPop() {
+            var title, options, printWindow, doc, fileref, cardMarkup;
+    
+            title = CARD_TYPE.slice(0, 1).toUpperCase() + CARD_TYPE.slice(1);
+            options = "toolbar=1,menubar=1,scrollbars=yes,scrolling=yes,resizable=yes,width=1000,height=500";
+            printWindow = window.open('', title, options);
+            doc = printWindow.document;
+    
+            cardMarkup = dojo.byId("printSection").innerHTML;
+    
+            doc.write('<html><head><title>' + iterationDropdown.getSelectedName() + ' ' + title + '</title>');
+            doc.write('<style>');
+            doc.write(getStyleSheet());
+            doc.write('</style>');
+            doc.write('</head><body class="landscape">');
+            doc.write(cardMarkup);
+            doc.write('</body></html>');
+            doc.close();
+    
+            printWindow.print();
+            return false;
+    	}
+    
+      this.display = function(element) {
+            iterationDropdown = new rally.sdk.ui.IterationDropdown({}, rallyDataSource);
+            iterationDropdown.display("iterationDropdown", runQuery);
+    
+            var config = {
+                text: "Print " + APP_TYPE + " Cards",
+                value: "myValue"
+            };
+            var button = new rally.sdk.ui.basic.Button(config);
+            button.display("buttonDiv", printPop);
+      }; 
+    }
+
+  </script>
+
+  <style type="text/css">
+    
+  </style>
+
+  <script type="text/javascript">
+    function onLoad() {
+      rally.sdk.ui.AppHeader.setHelpTopic("242");
+      var rallyDataSource = new rally.sdk.data.RallyDataSource('__WORKSPACE_OID__',
+              '__PROJECT_OID__',
+              '__PROJECT_SCOPING_UP__',
+              '__PROJECT_SCOPING_DOWN__');
+      var printTaskCards = new PrintTaskCards(rallyDataSource);
+      printTaskCards.display(dojo.body());
+    }
+
+    rally.addOnLoad(onLoad);
+  </script>
+
+  <style type="text/css" title="printCards">
+    /* PLEASE LEAVE THIS STYLESHEET INLINE SINCE TITLE IS NECESSARY */
+    @media print {
+        #interface {
+            display: none;
+        }
+    }
+
+	.pb {
+		clear: both;
+	}
+	
+    #buttonDiv,
+    #iterationDropdown {
+        display: inline;
+    }
+
+    #interface, #printSection {
+        margin: 20px;
+    }
+
+    html {
+        background-color: #fff;
+        color: #000;
+        font: 14pt / 1.26 Arial, Helvetica, sans-serif;
+        margin: 0;
+        padding: 0;
+    }
+
+    body {
+        background-color: #fff;
+        margin: 0;
+        padding: 0;
+    }
+
+    .cb {
+        clear: both;
+    }
+
+    .artifact {
+        background-color: #fff;
+        border: 2px solid #000;
+		border-radius: 18px;
+        float: left;
+        height: 3.2in;
+        margin: 0.1in 0.1in 0.1in 0.1in;
+        position: relative;
+        overflow: hidden;
+        width: 4.3in;
+    }
+
+    .header {
+        border: 1px;
+        border-bottom-style: solid;
+        display: table-cell;
+        font-size: 18px;
+        height: 40px;
+        vertical-align: middle;
+        width: 4.3in;
+    }
+
+    .card-title {
+        font: bold 28px Genova, sans-serif;
+        padding-top: 0.5em;
+        text-align: center;
+    }
+
+    .description {
+        float: left;
+        font: 12pt Georgia, sans-serif;
+        margin: 0.25em auto 0 auto;
+        padding-left: 1.0em;
+        padding-right: 1.0em;
+        overflow-y: hidden;
+        width: 100%;
+        word-wrap: break-word;
+    }
+
+    .owner {
+        float: right;
+        height: 40px;
+    }
+
+    .ownerText {
+        float: right;
+        font: 14pt / 1.26 Arial, Helvetica, sans-serif;
+        margin-right: 0.3em;
+        margin-top: 0.3em;
+    }
+
+    .storyID {
+        float: left;
+        font: 14pt / 1.26 Arial, Helvetica, sans-serif;
+        margin-left: 0.25em;
+        margin-top: 0.3em;
+    }
+
+    .estimate {
+        bottom: 0.5em;
+        position: absolute;
+        right: 0.5em;
+    }
+	
+	.state-sign {
+		bottom: 6.6em;
+        position: absolute;
+        right: 0.2em;
+		border: 1px solid #73AD21;
+		border-radius: 18px;
+		background: #73AD21;
+		width: 30px;
+		text-align: center;
+		color: #ffffff;
+	    font-size: 25px;
+		font-weight: bold;
+	}
+	
+    .content {
+        height: 2.4in;
+        overflow: hidden;
+        width: 4.3in;
+    }
+	.owner {
+		display: none;
+	}
+	
+	.ownerText {
+		display: none;
+	}
+	
+	.task-type {
+		width: 202px;
+		height: 200px;
+	}
+	
+	.task-type > .content {
+		width: initial;
+	}
+	
+	.story-type {
+		float: none;
+		clear: left;
+	}
+	
+	.page-break {
+		display: block;
+		clear: left;
+	}
+	
+	@media print {
+		.page-break	{ 
+			display: block; 
+			page-break-after: always; 
+		}
+	}
+	
+	.estimate-number {
+		border: 1px solid #73AD21;
+		border-radius: 18px;
+		background: #73AD21;
+		width: 35px;
+		text-align: center;
+		color: #ffffff;
+	    font-size: 30px;
+		font-weight: bold;
+	}
+  </style>
+</head>
+<body>
+<div style="float:right" id="help"></div>
+<div id="interface">
+    <div id="iterationDropdown"></div>
+    <div id="buttonDiv"></div>
+</div>
+<div id="printSection">
+    <div id="cards"></div>
+</div>
+</body>
+</html>
