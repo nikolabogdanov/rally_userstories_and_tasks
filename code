@@ -23,11 +23,11 @@
             var typeClass = "";
 			
 			if (taskId === '') {
-                id = storyId;
+                id = '<span style="font-weight: bold; color: blue;">' + storyId + '</span>';
 				typeClass = "story-type"
 				estimateNumber = '<span class="estimate estimate-number">' + estimate + '</span>';
             } else {
-                id = taskId + ':' + storyId;
+                id = taskId + ':<span style="font-weight: bold; color: blue;">' + storyId + '</span>';
 				typeClass = "task-type"
 				estimateNumber = '';
             }
