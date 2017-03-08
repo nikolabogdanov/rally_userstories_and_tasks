@@ -242,7 +242,7 @@
             iterationDropdown.display("iterationDropdown", runQuery);
     
             var config = {
-                text: "Print " + APP_TYPE + " Cards",
+                text: "Print Cards",
                 value: "myValue"
             };
             var button = new rally.sdk.ui.basic.Button(config);
