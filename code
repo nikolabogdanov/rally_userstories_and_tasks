@@ -53,6 +53,10 @@
             if (type === "task" && counter !== totalCards && counter % 3 === 0) {
                 theMarkup += '<div class=pb></div>';
             }
+			
+			if (type === "task" && counter !== totalCards && counter % 9 === 0) {
+                theMarkup += '<div class="page-break"></div>';
+            }
     
             return theMarkup;
     	}
