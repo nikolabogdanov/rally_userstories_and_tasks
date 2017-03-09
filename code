@@ -9,8 +9,10 @@
 
   <script type="text/javascript">
     var MAX_NAME_LEN = 100;
-    var APP_TYPE = "Task";
-    var CARD_TYPE = "tasks";
+    var TASK_TYPE = "tasks";
+	var STORY_TYPE = "stories";
+	var DEFECT_TYPE = "defects";
+	var COMPLETED = 'C';
   </script>
 
   <script type ="text/javascript" src="/apps/1.32/sdk.js"></script>
@@ -32,7 +34,7 @@
 				estimateNumber = '';
             }
 			
-			if(state === 'C') {
+			if(state === COMPLETED) {
 				state = '<span class="state-sign">'+ state+ '</span>';
 			}
     
@@ -50,11 +52,11 @@
                         estimateNumber +
 						'</div>';
     
-            if (type === "task" && counter !== totalCards && counter % 3 === 0) {
+            if (type === TASK_TYPE && counter !== totalCards && counter % 3 === 0) {
                 theMarkup += '<div class=pb></div>';
             }
 			
-			if (type === "task" && counter !== totalCards && counter % 9 === 0) {
+			if (type === TASK_TYPE && counter !== totalCards && counter % 9 === 0) {
                 theMarkup += '<div class="page-break"></div>';
             }
     
@@ -98,7 +100,7 @@
 			}
 			
 			if (data[i].State !== undefined && data[i].State === 'Completed') {
-				state = "C";
+				state = COMPLETED;
 			} 
 
 			description = data[i].Description;
@@ -113,13 +115,13 @@
     
             userTable = buildUserTable(results.users);
 		
-            data = results[CARD_TYPE];
-			stories = results['defects'];
-			stories = stories.concat(results['stories']);
+            data = results[TASK_TYPE];
+			stories = results[DEFECT_TYPE];
+			stories = stories.concat(results[STORY_TYPE]);
 
 			for (j = 0; j < stories.length; j++) {				
 								
-				theMarkup = createMarkupItem(stories, j, userTable, "story", 0);
+				theMarkup = createMarkupItem(stories, j, userTable, STORY_TYPE, 0);
 				
 				dojo.byId("cards").innerHTML += theMarkup;
 				
@@ -131,7 +133,7 @@
 						
 						counter++;
 						
-						theMarkup = createMarkupItem(data, i, userTable, "task", counter);
+						theMarkup = createMarkupItem(data, i, userTable, TASK_TYPE, counter);
 			
 						dojo.byId("cards").innerHTML += theMarkup;						
 					}
@@ -179,21 +181,21 @@
             var queryArray = [];
     
             queryArray[0] = {
-                key: CARD_TYPE,
-                type: CARD_TYPE,
+                key: TASK_TYPE,
+                type: TASK_TYPE,
                 query: '(Iteration.Name contains "' + iterationDropdown.getSelectedName() + '")',
                 fetch: 'Name,Iteration,WorkProduct,Owner,FormattedID,Estimate,ObjectID,Description,UserName,State',
                 order: 'Rank'
             };
 			 queryArray[1] = {
-                key: 'defects',
-                type: 'defects',
+                key: DEFECT_TYPE,
+                type: DEFECT_TYPE,
                 query: '(Iteration.Name contains "' + iterationDropdown.getSelectedName() + '")',
                 fetch: 'Name,Iteration,WorkProduct,Owner,FormattedID,Estimate,ObjectID,Description,UserName,PlanEstimate',
                 order: 'Rank'
             };
              queryArray[2] = {
-                key: 'stories',
+                key: STORY_TYPE,
                 type: 'hierarchicalrequirement',
                 query: '(Iteration.Name contains "' + iterationDropdown.getSelectedName() + '")',
                 fetch: 'Name,Iteration,WorkProduct,Owner,FormattedID,Estimate,ObjectID,Description,UserName,PlanEstimate',
@@ -221,7 +223,7 @@
     	function printPop() {
             var title, options, printWindow, doc, fileref, cardMarkup;
     
-            title = CARD_TYPE.slice(0, 1).toUpperCase() + CARD_TYPE.slice(1);
+            title = TASK_TYPE.slice(0, 1).toUpperCase() + TASK_TYPE.slice(1);
             options = "toolbar=1,menubar=1,scrollbars=yes,scrolling=yes,resizable=yes,width=1000,height=500";
             printWindow = window.open('', title, options);
             doc = printWindow.document;
