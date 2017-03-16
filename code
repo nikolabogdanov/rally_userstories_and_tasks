@@ -320,7 +320,7 @@
         border: 2px solid #000;
 		border-radius: 18px;
         float: left;
-        height: 3.2in;
+        height: 3.0in;
         margin: 0.1in 0.1in 0.1in 0.1in;
         position: relative;
         overflow: hidden;
@@ -380,7 +380,7 @@
     }
 	
 	.state-sign {
-		bottom: 6.6em;
+		bottom: 7.2em;
         position: absolute;
         right: 0.2em;
 		border: 1px solid #73AD21;
@@ -408,7 +408,7 @@
 	
 	.task-type {
 		width: 202px;
-		height: 200px;
+		height: 215px;
 	}
 	
 	.task-type > .content {
