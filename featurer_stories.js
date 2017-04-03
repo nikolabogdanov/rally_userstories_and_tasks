@@ -145,11 +145,11 @@
                 
 				//Print features instead of stories.
                 // query = "(PortfolioItemType.Ordinal = 0)";
-                console.log("level dropdown",levelDropdown);
+                //console.log("level dropdown",levelDropdown);
                 var selectedRelease = iterationDropdown.getSelectedName();
-                var level = levelDropdown.getSelectedItem().value;
-                console.log("selectedRelease",selectedRelease,level);
-                query = "((PortfolioItemType.Ordinal = " + level + ") and " +
+                //var level = levelDropdown.getSelectedItem().value;
+                //console.log("selectedRelease",selectedRelease,level);
+                query = "((PortfolioItemType.Ordinal = " + 0 + ") and " +
                     ( selectedRelease === "" ? "(Release = null)" 
                             : "(Release.Name = " + "\"" + selectedRelease + "\")" ) +
                     ")";
@@ -234,17 +234,19 @@
 			}
         
             this.display = function(){
-                levelDropdown = new rally.sdk.ui.basic.Dropdown( {
-                    label: "Hierarchy Level:",
-                    showLabel : true,
-                    items : [
-                        { label : "0", value : "0"},
-                        { label : "1", value : "1"},
-                        { label : "2", value : "2"}
-                    ],
-                    defaultValue : "0"
-                });
-                levelDropdown.display("levelDropdown");
+                
+				//levelDropdown = new rally.sdk.ui.basic.Dropdown( {
+                //    label: "Hierarchy Level:",
+                //    showLabel : true,
+                //    items : [
+                //        { label : "0", value : "0"},
+                //        { label : "1", value : "1"},
+                //        { label : "2", value : "2"}
+                //    ],
+                //    defaultValue : "0"
+                //});
+                //levelDropdown.display("levelDropdown");
+				
                 // iterationDropdown = new rally.sdk.ui.IterationDropdown({}, rallyDataSource);
                 iterationDropdown = new rally.sdk.ui.ReleaseDropdown({}, rallyDataSource);
                 iterationDropdown.addEventListener("onDataRetrieved",    onDataRetrieved);
@@ -387,7 +389,7 @@
 <body>
     <div style="float:right" id="help"></div>
     <div id="interface">
-        <div id="levelDropdown"></div>
+       <!-- <div id="levelDropdown"></div> -->
         <div id="iterationDropdown"></div>
         <div id="buttonDiv"></div>
     </div>
