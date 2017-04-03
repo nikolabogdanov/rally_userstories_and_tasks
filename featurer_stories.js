@@ -63,15 +63,25 @@
                     }
         
                     // description = data[i].Description.slice(0,240);
+					var typename = "feature"
 					
-					if(data[i].Feature !== undefined && data[i].Feature !== null && data[i].Feature.FormattedID !== undefined) {
-						storyId += " : " + data[i].Feature.FormattedID;
-					}
+					if(data[i]._type === 'HierarchicalRequirement') 
+					{
+						
+						if(data[i].Feature !== undefined && data[i].Feature !== null && data[i].Feature.FormattedID !== undefined) {
+							storyId += " : " + data[i].Feature.FormattedID;
+							typename = "story"
+						}
+						else {
+							typename = "story-no-feature"
+						}
+					}	
+					
 					
                     description = data[i].Description.slice(0,1024);
 					
                     theMarkup = createMarkup(i, data.length, name, ownerText, ownerClass, description,
-                            storyId, taskId, estimate);
+                            storyId, taskId, estimate, typename);
         
                     dojo.byId("cards").innerHTML += theMarkup;
                 }
@@ -95,7 +105,7 @@
                 }
             }
         
-            function createMarkup(cardNum, totalCards, name, ownerText, ownerClass, description, storyId, taskId, estimate) {
+            function createMarkup(cardNum, totalCards, name, ownerText, ownerClass, description, storyId, taskId, estimate, typename) {
                 var theMarkup, id;
                 if (CARD_TYPE === 'stories') {
                     id = storyId;
@@ -104,7 +114,7 @@
                 }
         
                 theMarkup =
-                        '<div class="artifact">' +
+                        '<div class="artifact ' + typename + '">' +
                                 '<div class="header">' +
                                 '<span class="storyID">' + id + '</span>' +
                                 '<span class="owner ' + ownerClass + '">' + '</span>' +
@@ -175,21 +185,22 @@
                 rallyDataSource.setApiVersion("1.43");
                 rallyDataSource.findAll(queryArray, displayCards);
 				
-				var queryArray1 = [];
-				queryArray1[0] = {
-                    key: "stories",
-                    type: 'hierarchicalrequirement',
-                    query: query1,
-                    fetch: 'Name,Iteration,WorkProduct,Owner,FormattedID,Estimate,ObjectID,Description,UserName,PlanEstimate,Parent,Feature',
-                    order: 'Rank'
-                };
-				queryArray1[1] = {
-                    key: 'users',
-                    type: 'users',
-                    fetch: 'UserName,ObjectID,DisplayName'
-                };
-				rallyDataSource.findAll(queryArray1, displayCards);
-				
+				setTimeout(function(){
+					var queryArray1 = [];
+					queryArray1[0] = {
+						key: "stories",
+						type: 'hierarchicalrequirement',
+						query: query1,
+						fetch: 'Name,Iteration,WorkProduct,Owner,FormattedID,Estimate,ObjectID,Description,UserName,PlanEstimate,Parent,Feature',
+						order: 'Rank'
+					};
+					queryArray1[1] = {
+						key: 'users',
+						type: 'users',
+						fetch: 'UserName,ObjectID,DisplayName'
+					};
+					rallyDataSource.findAll(queryArray1, displayCards);
+				}, 200);
             }
         
             function getStyleSheet() {
@@ -314,7 +325,7 @@
                 margin: 0.1in 0.1in 0.1in 0.1in;
                 position: relative;
                 overflow: hidden;
-                width: 4.5in;
+                width: 5.5in;
             }
  
             .header {
@@ -323,7 +334,7 @@
                 display: table-cell;
                 height: 30px;
                 vertical-align: middle;
-                width: 4.5in;
+                width: 5.5in;
             }
  
             .card-title {
@@ -369,8 +380,26 @@
             .content {
                 height: 2.0in;
                 overflow: hidden;
-                width: 4.5in;
+                width: 5.5in;
             }
+			
+			.feature {
+				height: 3.0in;
+				border: solid 4px;
+			}
+			
+			.story {
+				height: 2.2in;
+				border: solid 2px;
+			}
+			
+			.story-no-feature {
+				height: 2.2in;
+				border: solid 2px;
+			}
+			.story-no-feature .header {
+				background-color: gray;
+			}
  
     </style>
     <script type="text/javascript">
