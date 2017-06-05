@@ -382,7 +382,7 @@
                 overflow: hidden;
                 width: 5.5in;
             }
-			
+			 
 			.feature {
 				height: 3.0in;
 				border: solid 4px;
