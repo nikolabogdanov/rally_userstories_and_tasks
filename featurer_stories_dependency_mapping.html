@@ -81,7 +81,7 @@
 				
 				itemId = data[i].FormattedID;
 				if(typename ==='feature') {
-					capabilityName = data[i].Parent !== null ? data[i].Parent.Name : "";
+					capabilityName = data[i].Parent !== null ? data[i].Parent.Name : "No Capability - Independent";
 					capabilityId = data[i].Parent !== null ? data[i].Parent.FormattedID : "feature-no-capability";
 					capabilityColor = data[i].Parent !== null ? data[i].Parent.DisplayColor : "";
 					
