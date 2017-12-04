@@ -35,16 +35,13 @@
 				dojo.byId("cards").innerHTML += '<div class=cb>&nbsp;</div>';
 				
 				for (i = 0; i < data.length; i++) {
-					for (j = 0; j < data[i].UserStories.length; j++) {
-						data[i].UserStories[j].Feature = data[i];
-					}
-					displayStoryCards(data[i].UserStories, userTable);
+					displayStoryCards(data[i].UserStories, userTable, data[i]);
                 }
 				
 				populateOwner(results);
             }
 			
-			function displayStoryCards(data, userTable) {
+			function displayStoryCards(data, userTable, feature) {
             	console.log("stories:");
 				console.log("===============");
 				
@@ -54,6 +51,9 @@
                 //data = results[CARD_TYPE];
     
                 for (i = 0; i < data.length; i++) {		
+					
+					data[i].UserStories[j].Feature = feature;
+					
 					if(data[i].Feature !== null && data[i].Feature !== undefined) {
 						typename = "story"
 					}
