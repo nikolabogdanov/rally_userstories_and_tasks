@@ -37,7 +37,7 @@
 					displayStoryCards(data[i].UserStories, userTable, data[i]);
                 }
 				
-				populateOwner(results);
+				//populateOwner(results);
             }
 			
 			function displayStoryCards(data, userTable, feature) {
@@ -102,7 +102,8 @@
 					ownerText = "No Owner";
 				} else {
 					ownerClass += loginName.UserName.replace(/[@|\.]/g,"");
-					ownerText = makeOwnerText(loginName, userTable);
+					//ownerText = makeOwnerText(loginName, userTable);
+					ownerText = data[i].Project.Name;
 				}
 				
 					
