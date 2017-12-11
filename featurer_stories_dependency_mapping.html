@@ -91,6 +91,8 @@
 					}
 				} else if(data[i].Feature !== null) {
 					itemId += " " + data[i].Feature.FormattedID;
+					capabilityId = data[i].Feature.Parent !== null ? data[i].Feature.Parent.FormattedID : "feature-no-capability";
+					capabilityColor = data[i].Feature.Parent !== null ? data[i].Feature.Parent.DisplayColor : "";
 				}
 				
 				if(typename ==='feature') {
