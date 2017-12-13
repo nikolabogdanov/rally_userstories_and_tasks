@@ -38,6 +38,12 @@
                 }
 				
 				//populateOwner(results);
+				
+				var emptyMarkup = createEmptyMarkup();					
+				for(var i=0; i<20; i++) {
+					dojo.byId("cards").innerHTML += emptyMarkup;
+				}
+				
             }
 			
 			function displayStoryCards(data, userTable, feature) {
@@ -60,6 +66,7 @@
 								
 					setItemMarkup(data, i, userTable, typename);
                 }
+					
             }
         
 			function setItemMarkup(data, i, userTable, typename) {
@@ -126,7 +133,7 @@
 					
 				theMarkup = createMarkup(i, data.lenght, name, ownerText, ownerClass, description,
 						itemId, estimate, typename, capabilityName, capabilityId, capabilityColor);
-	
+					
 				dojo.byId("cards").innerHTML += theMarkup;
 			}
 			
@@ -176,6 +183,29 @@
         
                 return theMarkup;
             }
+			
+			function createEmptyMarkup() {
+				var theMarkup, displayId;
+             	
+                theMarkup =
+                        '<div class="artifact story" >' +
+							'<div class="header" >' +
+								'<span class="storyID"></span>' +
+								'<span class="capabilityName"></span>' +
+								'<span class="owner"></span>' +
+								'<span class="ownerText"></span>' +
+							'</div>' +
+							'<div class="content">' +
+								'<div class="card-title"></div>' +
+								'<div class="description"></div>' +
+							'</div>' +
+							'<div class="estimate">' + 
+							'</div>' +
+						'</div>';
+				theMarkup = theMarkup + '<div class=cb>&nbsp;</div>';
+                
+                return theMarkup;
+			}
         
             function populateOwner(results) {
                 for (i = 0; i < results.users.length; i++) {
